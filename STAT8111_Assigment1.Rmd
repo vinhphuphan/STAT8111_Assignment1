@@ -1,0 +1,29 @@
+---
+title: "STAT8111_Assigment1"
+author: "Phan Vinh Phu 45747989"
+date: "2023-08-18"
+output: html_document
+---
+
+```{r global-option, include=FALSE}
+knitr::opts_chunk$set(fig.width=10,fig.height=5,fig.align='left',warning=FALSE,message=FALSE,echo=TRUE)
+```
+
+```{r  setup, include=FALSE}
+library(tidyverse)
+library(GGally)
+library(ISwR)
+```
+
+# Question 1
+
+## a.Examine first graphically and numerically correlation between variables, then comment :
+
+```{r read the data, include=TRUE }
+data <- cystfibr
+head(data)
+```
+
+## Including Plots
+
+
