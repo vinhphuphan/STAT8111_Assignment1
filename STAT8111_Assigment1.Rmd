@@ -1,8 +1,10 @@
 ---
-title: "STAT8111_Assigment1"
+title: "STAT8111 Assigment1"
 author: "Phan Vinh Phu 45747989"
 date: "2023-08-18"
-output: html_document
+output:
+  pdf_document:
+    latex_engine: xelatex
 ---
 
 ```{r global-option, include=FALSE}
@@ -13,17 +15,117 @@ knitr::opts_chunk$set(fig.width=10,fig.height=5,fig.align='left',warning=FALSE,m
 library(tidyverse)
 library(GGally)
 library(ISwR)
+library(corrplot)
 ```
 
 # Question 1
-
-## a.Examine first graphically and numerically correlation between variables, then comment :
-
-```{r read the data, include=TRUE }
+```{r read the data, include=FALSE }
 data <- cystfibr
 head(data)
 ```
 
-## Including Plots
+## a.Examine first graphically and numerically correlation between variables, then comment :
+
+### Numerical correlation
+```{r numerical correlation, include=TRUE }
+num_cor <- round(cor(data), 4)
+num_cor
+```
+\pagebreak
+
+### Graphical correlation
+```{r graphical correlation, include=TRUE }
+corrplot(num_cor, type="lower")
+```
+### Comment :
+From the correlation plot, it can be seen that :
+
+- There might be a strong positive linear relationship between `age` and `height`, `weight` and `pemax`. Beside that, `age` is negatively correlated with `frc`.
+
+- `height` and `weight` are strongly correlated. In addition, `weight` has moderate negative correlation with `rv`, `frc`, `tlc` and positive correlation with `bmp`, `pemax`.
+
+- Similarly, `fev1` has moderate negative correlation with `rv`, `frc`, `tlc`.
+
+- Lastly, `rv` highly positively correlated with `frc`.
+
+## b. the relationship between `weight` and `pemax`
+
+In this part, the relationship between `weight` and `pemax` will be examined.Specifically, `pemax` is the dependent variable (Y) and `weight` is the independent variable (X).
+
+### Scatter Plot
+```{r scatter Plot, include=TRUE }
+plot(x = data$weight, y = data$pemax, xlab="weight", ylab = "pemax")
+```
+
+The graph illustrates that `weight` is positively related with `pmax`. The trend is that when `weight` increase, `pmax` will increase.
+
+### Linear Model
+```{r linear Model, include=TRUE }
+model <- lm(pemax ~ weight, data = data)
+summary(model)
+```
+
+#### The model equation 
+
+$\hat{pmax} = 63.5456 + 1.1867 weight +  \epsilon$
+
+#### Model Fit
+
+- The $R^2 = 0.4035$ which means 40.35% of variation in `pemax` can be explained by `weight`. This show that the model is not fit well.
+
+#### Model interpretation
+
+- According to the equation, for each unit increase in weight, the pemax will increase about 1.1867.   
+
+- `weight` is significant predictor since the p-value = 0.000646 (< 0.001).
+
+#### Diagnostic
+
+```{r diagnostic, include=TRUE }
+par(mfrow = c(2,2))
+plot(model)
+```
+
+
+- The standardized Residuals versus Fitted values plot appears to be a random scatter about zero, so the model is adequate.This graph also show some residuals which are 14, 17, 25 are low and high. This can be evidence of small amount of heteroscedasticity.
+
+- the Normal Q-Q plot is approximately linear, so it can be said that the normality assumption holds.
+
+## c. Include in the previous model the sex variable
+
+### Model 2
+```{r model 2, include=TRUE }
+model_2 <- lm(pemax ~ weight + sex, data = data)
+summary(model_2)
+```
+
+**The model 2 equation**
+
+$\hat{pmax} = 70.9719 + 1.1248  weight +(-11.4776)sex  +  \epsilon$
+
+### Model 3
+```{r model 3, include=TRUE }
+model_3 <- lm(pemax ~ sex + weight, data = data)
+summary(model_3)
+```
+
+**The model 3 equation**
+
+$\hat{pmax} = 70.9719 +(-11.4776)sex + 1.1248weight   +  \epsilon$
+
+### Analyse the two proposed models
+
+- Model_2 and model_3 are seem to be similar. The only difference is the order of `weight` and `sex`. The $R^2$ of both model are 0.4327 which mean 43.27% of variant in `pmax` can be explained by `weight` and sex. On the one hand, in both two model, `sex` is insignificant predictor with p-value = 0.29926. On the other hand, `weight` is still significant predictor. 
+
+- For one unit increase in `weight` , `pmax` will increase 1.1248. The coefficient of `sex` represents the difference in `pmax` between females and males, while `weight` is same. In this case, models indicate that, on average, females have a `pmax` that is lower by 11.4776 units compared to males.
+
+In conclusion, it appears that the order of variables (`weight` and `sex`) doesn't affect the results in this case. Model_2 and model_3 are better than the first model on question (b) but these two still are not good model.
+
+### Choose one model
+
+In comparison of three models, model 2 and model 3 are appear to explain `pmax` better with higher $R^2$ and adjusted $R^2$. Beside that, there are no collinearity issue between `weight` and `sex`. Therefore, I choose model 2.
+
+## d. Construct a statistical model for the response variables pemax based on the normal response distribution and the weight, bmp, fev1, rv,frc.
+
 
 
