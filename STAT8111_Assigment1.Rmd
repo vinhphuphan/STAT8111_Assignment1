@@ -122,9 +122,64 @@ In comparison of three models, model 2 and model 3 are appear to explain `pemax`
 
 ## d. Construct a statistical model for the response variables pemax based on the normal response distribution and the weight, bmp, fev1, rv,frc.
 
+<!-- ###Examine a histogram -->
+
+```{r histogram, include=FALSE}
+par(mfrow = c(2,3))
+hist(data$pemax,
+    main="Distribution of pemax",
+    col="#98c1d9")
+hist(data$weight,
+    main="Distribution of weight",
+    xlab="kg",
+    col="#98c1d9")
+hist(data$fev1,
+    main="Distribution of fev1",
+    col="#98c1d9")
+hist(data$bmp,
+    main="Distribution of bmp",
+    xlab="% of normal",
+    col="#98c1d9")
+hist(data$rv, 
+     main="Distribution of rv",
+     col="#98c1d9")
+hist(data$frc, 
+     main="Distribution of frc",
+     col="#98c1d9")
+
+```
+
+<!-- According to the histogram, the distributions of `pemax`, `weight`, `bmp`, `fev1`,`rv`, `frc` are right-skewed. Hence, there is a need of transformation. The appropriate transformation for right-skewed distribution is log transformation. -->
+
+<!-- **After log transformation** -->
+```{r histogram log, include=FALSE}
+par(mfrow = c(2,3))
+hist(log(data$pemax),
+    main="Distribution of log(pemax)",
+    col="#98c1d9")
+hist(log(data$weight),
+    main="Distribution of log(weight)",
+    xlab="kg",
+    col="#98c1d9")
+hist(log(data$fev1),
+    main="Distribution of log(fev1)",
+    col="#98c1d9")
+hist(log(data$bmp),
+    main="Distribution of log(bmp)",
+    xlab="% of normal",
+    col="#98c1d9")
+hist(log(data$rv), 
+     main="Distribution of log(rv)",
+     col="#98c1d9")
+hist(log(data$frc), 
+     main="Distribution of log(frc)",
+     col="#98c1d9")
+```
+<!-- Now, the distribution of log(`pemax`) is seem to be better than the distribution of `pemax`. -->
+
 We are interested in predicting `pemax` (maximal expiratory pressure) by using `weight`, `bmp`, `fev1`, `rv`,`frc`. In this case, the stepwise backward selection will be used to find the best model. In stepwise backward selection, people first regress with all predictor variables in the model. Then, the predictors with the largest p-value in the t-test will be dropped. Next step is fitting the reduced model. This progess will be run iteratively until all variables in the model are significant.Let's start with the full model.
 
-###Full Model
+### Full Model
 ```{r fullmodel, include=TRUE }
 full_model <- lm(pemax ~ weight + bmp + fev1 + rv + frc , data = data)
 summary(full_model)
@@ -132,7 +187,7 @@ summary(full_model)
 
 It can be seen that `frc` has the largest p-value which is 0.937703. Therefore, `frc` explains the least variation when added to the model. Now , `frc` will be dropped.
 
-###The reduced model without `frc`
+### The reduced model without `frc`
 ```{r reduced without frc, include=TRUE }
 reduced_model <- lm(pemax ~ weight + bmp + fev1 + rv , data = data)
 summary(reduced_model)
@@ -141,7 +196,7 @@ summary(reduced_model)
 Similarly, `rv` is the insignificant predictor and has the largest P-value which is 0.146178. Hence, I drop `rv` and fit the reduced model without `frc` and `rv`.
 
 
-###The reduced model without `frc` and `rv`
+### The reduced model without `frc` and `rv`
 ```{r reduced without frc and rv, include=TRUE }
 reduced_model_2 <- lm(pemax ~ weight + bmp + fev1 , data = data)
 summary(reduced_model_2)
@@ -155,7 +210,7 @@ correlation_matrix <- cor(data[, c("weight", "bmp", "fev1")])
 # Print the correlation matrix
 print(correlation_matrix)
 ```
-###Diagnostic Checking
+### Diagnostic Checking
 
 ```{r diagnostic 2, include=TRUE }
 par(mfrow = c(1,2))
@@ -167,6 +222,61 @@ plot(reduced_model_2, which = 1:2)
 - The quantile plot of residuals look approximately linear, suggesting the normality assumption for
 residuals is appropriate.
 
-###The final model equation
+### The final model equation
 
 $\hat{pemax} = 126.3336 + 1.5365weight + (-1.4654)bmp + 1.1086fev1  +  \epsilon$  $\>$ $( \epsilon \sim N(0, \sigma^2))$ 
+
+### Interpretaion
+From above equation, 
+
+-  For every unit increase in `weight` (`bmp` and `fev1` stay unchanged), the average `pemax` is expected to increase by 1.5365 units.
+
+- For every unit increase in `bmp` (holding `weight` and `fev1` constant), the average `pemax` is expected to decrease by 1.4654 units.
+
+- For one extra unit of `fev1` , the average `pemax` is expected to increase by 1.1086 units.
+
+- The R-squared value of 0.57 indicates that approximately 57% of the variability in the `pemax` can be explained by the predictor variables (`weight`, `bmp`, and `fev1`) included in the model.
+
+# Question 2
+## a.Show that the Inverse Gaussian distribution is a member of the exponential family
+
+The Inverse Gaussian distribution is defined as
+
+\[ f(x ; \mu, \gamma) = \sqrt{\frac{\gamma}{2\pi x^3}} \exp\left(-\frac{\gamma(x - \mu)^2}{2\mu^2x}\right) \]
+
+where \[ \mu > 0 \>\>and\>\>\gamma > 0 \]
+
+\[ f(x ; \mu, \gamma) = \exp\left(\frac{1}{2}log(\frac{\gamma}{2\pi x^3})-\frac{\gamma}{2\mu^2}\frac{(x - \mu)^2}{x}\right) \]
+
+\[ f(x ; \mu, \gamma) = \exp\left(\frac{1}{2}log(\frac{\gamma}{2\pi x^3})-\frac{\gamma}{2\mu^2}\frac{(x^2 - 2x\mu + \mu^2)}{x}\right) \]
+
+\[ f(x ; \mu, \gamma) = \exp\left(\frac{1}{2}log(\frac{\gamma}{2\pi x^3})-\frac{\gamma x}{2\mu^2}+\frac{x}{\mu} +\frac{\gamma}{2x}\right) \]
+
+\[ f(x ; \mu, \gamma) = \exp\left(-\frac{\gamma x}{2\mu^2}+\frac{x}{\mu}+\frac{1}{2}log(\frac{\gamma}{2\pi x^3}) +\frac{\gamma}{2x}\right) \]
+
+The simpler form of the pdf:
+\[ f(y ; \theta, \phi) = \exp\left(\frac{y\theta - b(\theta) }{a(\phi)}+c(y, \phi)\right) \]
+
+in this case :
+\[\frac{y\theta - b(\theta) }{a(\phi)}+c(y, \phi) = -\frac{\gamma x}{2\mu^2}+\frac{x}{\mu}+\frac{1}{2}log(\frac{\gamma}{2\pi x^3}) +\frac{\gamma}{2x}\]
+
+with: \[\phi = \gamma , \> a = \frac{1}{\phi}, \> \theta = -\frac{1}{2\mu^2}, \>b = -\sqrt{-2\theta} , c = \frac{1}{2}log(\frac{\theta}{2\pi x^3}) +\frac{\theta}{2x}\].
+
+## b. Give the natural parameter and the scale parameter
+
+In the context of the exponential family representation of the Inverse Gaussian distribution, the natural parameter and the scale parameter can be identified as follows:
+
+**Natural Parameter** \[\theta\]:
+For the Inverse Gaussian distribution, the natural parameter \[\theta\] is given by:
+
+\[\theta = -\frac{1}{2\mu^2}\]
+
+**Scale Parameter** \[\phi\]:
+
+In this case, the scale parameter \[\phi\] corresponds to \[\gamma\], which is a parameter of the Inverse Gaussian distribution:
+
+\[\phi = \gamma\]
+
+Therefore, in the exponential family form, the natural parameter is \[\mu\], and the scale parameter is \[\gamma\] of the Inverse Gaussian distribution.
+
+## c.
