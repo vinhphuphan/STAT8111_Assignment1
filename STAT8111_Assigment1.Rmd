@@ -16,6 +16,8 @@ library(tidyverse)
 library(GGally)
 library(ISwR)
 library(corrplot)
+library(ggplot2)
+library(extraDistr)
 ```
 
 # Question 1
@@ -38,7 +40,7 @@ num_cor
 corrplot(num_cor, type="lower")
 ```
 ### Comment :
-From the correlation plot, it can be seen that :
+From the above correlation plot and correlation table, it can be seen that :
 
 - There might be a strong positive linear relationship between `age` and `height`, `weight` and `pemax`. Beside that, `age` is negatively correlated with `frc`.
 
@@ -51,6 +53,8 @@ From the correlation plot, it can be seen that :
 ## b. the relationship between `weight` and `pemax`
 
 In this part, the relationship between `weight` and `pemax` will be examined.Specifically, `pemax` is the dependent variable (Y) and `weight` is the independent variable (X).
+
+\pagebreak
 
 ### Scatter Plot
 ```{r scatter Plot, include=TRUE }
@@ -79,6 +83,7 @@ $\hat{pemax} = 63.5456 + 1.1867 weight +  \epsilon$ $\>$$( \epsilon \sim N(0, \s
 - `weight` is significant predictor since the p-value = 0.000646 (< 0.001).
 
 #### Diagnostic Checking
+
 ```{r diagnostic, include=TRUE }
 par(mfrow = c(1,2))
 plot(model, which = c(1,2))
@@ -87,95 +92,69 @@ plot(model, which = c(1,2))
 
 - the Normal Q-Q plot is approximately linear, so it can be said that the normality assumption holds.
 
+\pagebreak
+
 ## c. Include in the previous model the sex variable
 ### Model 2
 ```{r model 2, include=TRUE }
-model_2 <- lm(pemax ~ weight + sex, data = data)
+model_2 <- lm(pemax ~ sex, data = data)
 summary(model_2)
 ```
 
-**The model 2 equation**
+**The model 2 equation** $\hat{pemax} = 117.50 +(-19.05)sex_i  +  \epsilon$ $\>$ $( \epsilon \sim N(0, \sigma^2))$ 
 
-$\hat{pemax} = 70.9719 + 1.1248  weight +(-11.4776)sex  +  \epsilon$ $\>$ $( \epsilon \sim N(0, \sigma^2))$ 
+**Model 2 analysis**
+
+- This model only includes the "sex" variable as a predictor for "pemax."
+
+- For p-value = 0.162, `sex` is insignificant predictor since there is no clear relationship between `sex` and `pemax`.
+
+- The $R^2 = 0.08327$ indicates that the model is poor, only 8.32% of variation in `pemax` can be explained by `sex`.
+
+- The F-statistic is not highly significant (p-value: 0.1618), suggesting that the model might not be a good fit for the data.
+
+\pagebreak
 
 ### Model 3
+**Check the interaction plot**
+```{r interaction plot, include=TRUE}
+# Create an interaction plot
+ggplot(data, aes(x = weight, y = pemax, color = factor(sex))) +
+  geom_point() +
+  geom_smooth(method = "lm", formula = y ~ x, se = FALSE) +
+  labs(title = "Interaction: Weight and Pemax by Sex",
+       x = "Weight", y = "Pemax", color = "Sex") +
+  theme_minimal()
+```
+
+The lines of graph are not parallel which shows that there is a significant interaction between `weight` and `pemax` with respect to `sex`. This interaction effect indicates that the relationship between `weight` and `pemax` variable depends on the sex of the individual. This suggests that there might be an interaction effect between `weight` and `sex` in predicting `pemax`.
+
 ```{r model 3, include=TRUE }
-model_3 <- lm(pemax ~ sex + weight, data = data)
+model_3 <- lm(pemax ~ weight*sex, data = data)
 summary(model_3)
 ```
 
 **The model 3 equation**
 
-$\hat{pemax} = 70.9719 +(-11.4776)sex + 1.1248weight   +  \epsilon$ $\>$ $( \epsilon \sim N(0, \sigma^2))$ 
+$\hat{pemax} = 61.3603 + 1.3572weight + 22.0905sex + (-0.9240) weight\times sex  +  \epsilon$ $\>$ $( \epsilon \sim N(0, \sigma^2))$ 
 
-### Analyse the two proposed models
 
-- Model_2 and model_3 are seem to be similar. The only difference is the order of `weight` and `sex`. The $R^2$ of both model are 0.4327 which mean 43.27% of variant in `pemax` can be explained by `weight` and sex. On the one hand, in both two model, `sex` is insignificant predictor with p-value = 0.29926. On the other hand, `weight` is still significant predictor. 
+**Model 3 analysis**
 
-- For one unit increase in `weight` , `pemax` will increase 1.1248. The coefficient of `sex` represents the difference in `pemax` between females and males, while `weight` is same. In this case, models indicate that, on average, females have a `pemax` that is lower by 11.4776 units compared to males.
+- Model 3 includes both `weight` and `sex` as predictors for `pemax` as well as an interaction term between them.
 
-In conclusion, it appears that the order of variables (`weight` and `sex`) doesn't affect the results in this case. Model_2 and model_3 are better than the first model on question (b) but these two still are not good model.
+- Only `weight` is the significant predictor with p-value = 0.0008. Beside that, `sex` and the interaction term are insignificant. This means The interaction is insignificant in this case.
 
-### Choose one model
+-  The $R^2 = 0.477$ is higher than in Model 2, indicating that this model explains more variability in the response.
 
-In comparison of three models, model 2 and model 3 are appear to explain `pemax` better with higher $R^2$ and adjusted $R^2$. Beside that, there are no collinearity issue between `weight` and `sex`. Therefore, I choose model 2.
+- The F-statistic is significant (p-value: 0.003025), suggesting that the overall model is a better fit than a model without predictors.
+
+
+### Conclusion
+
+Based on the analysis, Model 3 (including both "weight" and "sex" with interaction) seems to be a better fit for predicting "pemax" compared to Model 1 (including `weight`) and Model 2 (only "sex").  Model 2 (with  $R^2 = 0.477$ and $adjusted R^2 = 0.4023$ ) provides more insight into the relationship between the predictors and the response, and it demonstrates a better overall fit to the data.
 
 ## d. Construct a statistical model for the response variables pemax based on the normal response distribution and the weight, bmp, fev1, rv,frc.
-
-<!-- ###Examine a histogram -->
-
-```{r histogram, include=FALSE}
-par(mfrow = c(2,3))
-hist(data$pemax,
-    main="Distribution of pemax",
-    col="#98c1d9")
-hist(data$weight,
-    main="Distribution of weight",
-    xlab="kg",
-    col="#98c1d9")
-hist(data$fev1,
-    main="Distribution of fev1",
-    col="#98c1d9")
-hist(data$bmp,
-    main="Distribution of bmp",
-    xlab="% of normal",
-    col="#98c1d9")
-hist(data$rv, 
-     main="Distribution of rv",
-     col="#98c1d9")
-hist(data$frc, 
-     main="Distribution of frc",
-     col="#98c1d9")
-
-```
-
-<!-- According to the histogram, the distributions of `pemax`, `weight`, `bmp`, `fev1`,`rv`, `frc` are right-skewed. Hence, there is a need of transformation. The appropriate transformation for right-skewed distribution is log transformation. -->
-
-<!-- **After log transformation** -->
-```{r histogram log, include=FALSE}
-par(mfrow = c(2,3))
-hist(log(data$pemax),
-    main="Distribution of log(pemax)",
-    col="#98c1d9")
-hist(log(data$weight),
-    main="Distribution of log(weight)",
-    xlab="kg",
-    col="#98c1d9")
-hist(log(data$fev1),
-    main="Distribution of log(fev1)",
-    col="#98c1d9")
-hist(log(data$bmp),
-    main="Distribution of log(bmp)",
-    xlab="% of normal",
-    col="#98c1d9")
-hist(log(data$rv), 
-     main="Distribution of log(rv)",
-     col="#98c1d9")
-hist(log(data$frc), 
-     main="Distribution of log(frc)",
-     col="#98c1d9")
-```
-<!-- Now, the distribution of log(`pemax`) is seem to be better than the distribution of `pemax`. -->
 
 We are interested in predicting `pemax` (maximal expiratory pressure) by using `weight`, `bmp`, `fev1`, `rv`,`frc`. In this case, the stepwise backward selection will be used to find the best model. In stepwise backward selection, people first regress with all predictor variables in the model. Then, the predictors with the largest p-value in the t-test will be dropped. Next step is fitting the reduced model. This progess will be run iteratively until all variables in the model are significant.Let's start with the full model.
 
@@ -237,22 +216,20 @@ From above equation,
 
 - The R-squared value of 0.57 indicates that approximately 57% of the variability in the `pemax` can be explained by the predictor variables (`weight`, `bmp`, and `fev1`) included in the model.
 
+- The final mode has a balance between model complexity and goodness of fit.
+
 # Question 2
 ## a.Show that the Inverse Gaussian distribution is a member of the exponential family
 
-The Inverse Gaussian distribution is defined as
+The Inverse Gaussian distribution is defined a
 
-\[ f(x ; \mu, \gamma) = \sqrt{\frac{\gamma}{2\pi x^3}} \exp\left(-\frac{\gamma(x - \mu)^2}{2\mu^2x}\right) \]
-
-where \[ \mu > 0 \>\>and\>\>\gamma > 0 \]
-
-\[ f(x ; \mu, \gamma) = \exp\left(\frac{1}{2}log(\frac{\gamma}{2\pi x^3})-\frac{\gamma}{2\mu^2}\frac{(x - \mu)^2}{x}\right) \]
-
-\[ f(x ; \mu, \gamma) = \exp\left(\frac{1}{2}log(\frac{\gamma}{2\pi x^3})-\frac{\gamma}{2\mu^2}\frac{(x^2 - 2x\mu + \mu^2)}{x}\right) \]
-
-\[ f(x ; \mu, \gamma) = \exp\left(\frac{1}{2}log(\frac{\gamma}{2\pi x^3})-\frac{\gamma x}{2\mu^2}+\frac{x}{\mu} +\frac{\gamma}{2x}\right) \]
-
-\[ f(x ; \mu, \gamma) = \exp\left(-\frac{\gamma x}{2\mu^2}+\frac{x}{\mu}+\frac{1}{2}log(\frac{\gamma}{2\pi x^3}) +\frac{\gamma}{2x}\right) \]
+\begin{align*}
+f(x ; \mu, \gamma) &= \sqrt{\frac{\gamma}{2\pi x^3}} \exp\left(-\frac{\gamma(x - \mu)^2}{2\mu^2x}\right)\\ \\
+f(x ; \mu, \gamma) &= \exp\left(\frac{1}{2}\log\left(\frac{\gamma}{2\pi x^3}\right)-\frac{\gamma}{2\mu^2}\frac{(x - \mu)^2}{x}\right) \\ \\
+f(x ; \mu, \gamma) &= \exp\left(\frac{1}{2}\log\left(\frac{\gamma}{2\pi x^3}\right)-\frac{\gamma}{2\mu^2}\frac{(x^2 - 2x\mu + \mu^2)}{x}\right) \\ \\
+f(x ; \mu, \gamma) &= \exp\left(\frac{1}{2}\log\left(\frac{\gamma}{2\pi x^3}\right)-\frac{\gamma x}{2\mu^2}+\frac{x}{\mu} +\frac{\gamma}{2x}\right) \\ \\
+f(x ; \mu, \gamma) &= \exp\left(-\frac{\gamma x}{2\mu^2}+\frac{x}{\mu}+\frac{1}{2}\log\left(\frac{\gamma}{2\pi x^3}\right) +\frac{\gamma}{2x}\right)
+\end{align*}
 
 The simpler form of the pdf:
 \[ f(y ; \theta, \phi) = \exp\left(\frac{y\theta - b(\theta) }{a(\phi)}+c(y, \phi)\right) \]
@@ -260,23 +237,123 @@ The simpler form of the pdf:
 in this case :
 \[\frac{y\theta - b(\theta) }{a(\phi)}+c(y, \phi) = -\frac{\gamma x}{2\mu^2}+\frac{x}{\mu}+\frac{1}{2}log(\frac{\gamma}{2\pi x^3}) +\frac{\gamma}{2x}\]
 
-with: \[\phi = \gamma , \> a = \frac{1}{\phi}, \> \theta = -\frac{1}{2\mu^2}, \>b = -\sqrt{-2\theta} , c = \frac{1}{2}log(\frac{\theta}{2\pi x^3}) +\frac{\theta}{2x}\].
+with: \[\phi = \frac{1}{\gamma} , \> a(\phi) = \frac{1}{\gamma}, \> \theta = -\frac{1}{2\mu^2}, \>b(\theta) = 2\theta^\frac{1}{2} , c = \frac{1}{2}log(\frac{\theta}{2\pi x^3}) +\frac{\theta}{2x}\].
 
 ## b. Give the natural parameter and the scale parameter
 
-In the context of the exponential family representation of the Inverse Gaussian distribution, the natural parameter and the scale parameter can be identified as follows:
+In the context of the exponential family representation of the Inverse Gaussian distribution, the natural parameter and the scale parameter can be identified as follows :
 
-**Natural Parameter** \[\theta\]:
-For the Inverse Gaussian distribution, the natural parameter \[\theta\] is given by:
+**Natural Parameter** is $-\frac{\gamma}{2\mu^2}$.
 
-\[\theta = -\frac{1}{2\mu^2}\]
+**Scale Parameter** is $\mu$.
 
-**Scale Parameter** \[\phi\]:
+## c. Derive the mean and variance of Inverse Gaussian distribution.
 
-In this case, the scale parameter \[\phi\] corresponds to \[\gamma\], which is a parameter of the Inverse Gaussian distribution:
+**Mean**
+\begin{align*}
+b'(\theta) &= \frac{1}{\sqrt{2\theta}}, \quad \text{where } \theta = -\frac{1}{2\mu^2}. \\
+\text{Substitute } \theta &= -\frac{1}{2\mu^2}: \\
+b'(\theta) &= \frac{1}{\sqrt{2 \left( -\frac{1}{2\mu^2} \right)}} \\
+\text{Simplify:} \\
+b'(\theta) &= \frac{1}{\sqrt{-\frac{1}{\mu^2}}} = \frac{1}{\frac{1}{\mu}} = \mu \\
+\text{So, } E[X] &= \mu \\
+\end{align*}
+**Variance**
 
-\[\phi = \gamma\]
+\begin{align*}
+Var(Y) &= b''(\theta)\phi \\ \\
+Var(Y) &= \phi\theta^{-\frac{3}{2}} \\ \\
+Recall\>that\>\theta^{-\frac{1}{2}} &= \mu\> and\> \phi = \frac{1}{\gamma}\\ \\
+\Rightarrow\>Var(Y) &= \frac{\mu^3}{\gamma}
+\end{align*}
 
-Therefore, in the exponential family form, the natural parameter is \[\mu\], and the scale parameter is \[\gamma\] of the Inverse Gaussian distribution.
+# Question 3
 
-## c.
+The normal linear model is
+\[Y_i = x_i^T\beta + \epsilon_i \quad \text{for } i = 1, \ldots, n\]
+where \(\beta = (\beta_1, \ldots, \beta_p)^T\) is the \(p\)-dimensional regressor parameter, and the \(\epsilon_i\) are the noise of the model.
+
+## a.
+
+Given the Normal distribution for the noise \(\epsilon_i\) as \(N(0, \sigma^2)\), the likelihood of \(y_i\) is:
+
+\[L_i(\beta) = \frac{1}{\sigma\sqrt{2\pi}} \exp\left(-\frac{1}{2}\left(\frac{y_i - x_i^T\beta}{\sigma}\right)^2\right)\]
+
+The likelihood of the entire sample \(y\) is the product of the individual likelihoods:
+
+\[L(\beta) = \prod_{i=1}^{n} L_i(\beta) = \prod_{i=1}^{n} \frac{1}{\sigma\sqrt{2\pi}} \exp\left(-\frac{1}{2}\left(\frac{y_i - x_i^T\beta}{\sigma}\right)^2\right)\]
+
+Now, let's consider the log-likelihood:
+
+\begin{align*}
+l(\beta) &= \sum_{i=1}^{n} \log\left(\frac{1}{\sigma\sqrt{2\pi}}\right) - \frac{1}{2}\left(\frac{y_i - x_i^T\beta}{\sigma}\right)^2 \\
+&= -n \log\left(\sigma\sqrt{2\pi}\right) - \frac{1}{2\sigma^2}\sum_{i=1}^{n} \left(y_i - x_i^T\beta\right)^2
+\end{align*}
+
+To find the maximum likelihood estimator of \(\beta\), we want to maximize \(l(\beta)\) with respect to \(\beta\). Since maximizing the log-likelihood is equivalent to maximizing the likelihood itself, we need to find the value of \(\beta\) that maximizes the expression above.
+
+Maximizing \(l(\beta)\) with respect to \(\beta\) is equivalent to minimizing the following expression, which is proportional to the squared error loss:
+
+\[LS(\beta) = \frac{1}{n}\sum_{i=1}^{n} \left(y_i - x_i^T\beta\right)^2\]
+
+Therefore, the maximum likelihood estimator of the parameter \(\beta\) is also the solution of the squared error loss, known as the least square error (LS), given by \(LS(\beta)\). This demonstrates the connection between the maximum likelihood estimation and the least squares estimation.
+
+## b.
+
+Given the Laplace distribution for the noise \(\epsilon_i\) as \(L(0, \sigma^2)\), the likelihood of \(y_i\) is:
+
+\[L_i(\beta) = \frac{1}{2\sigma} \exp\left(-\frac{|y_i - x_i^T\beta|}{\sigma}\right)\]
+
+The likelihood of the entire sample \(y\) is the product of the individual likelihoods:
+
+\[L(\beta) = \prod_{i=1}^{n} L_i(\beta) = \prod_{i=1}^{n} \frac{1}{2\sigma} \exp\left(-\frac{|y_i - x_i^T\beta|}{\sigma}\right)\]
+
+Now, let's consider the log-likelihood:
+
+\begin{align*}
+l(\beta) &= \sum_{i=1}^{n} \log\left(\frac{1}{2\sigma}\right) - \frac{|y_i - x_i^T\beta|}{\sigma} \\
+&= -n \log(2\sigma) - \frac{1}{\sigma}\sum_{i=1}^{n} |y_i - x_i^T\beta|
+\end{align*}
+
+To maximize \(l(\beta)\) with respect to \(\beta\), we want to maximize the negative of the absolute error loss, which is equivalent to minimizing the absolute error loss itself:
+
+\[AL(\beta) = \frac{1}{n}\sum_{i=1}^{n} |y_i - x_i^T\beta|\]
+
+Therefore, in the case of a Laplace distribution error noise, maximizing the log-likelihood is equivalent to minimizing the absolute error loss (AL) defined by \(AL(\beta)\). This demonstrates the connection between the maximum likelihood estimation and the minimization of the absolute error loss for the Laplace distribution case.
+
+## c. 
+
+```{r plot, include=TRUE}
+# Parameters
+mu <- 0         # Mean for both distributions
+sigma <- 1      # Standard deviation for the Normal distribution
+scale <- sqrt(2) * sigma  # Scale parameter for Laplace distribution
+
+# Values for x-axis
+x <- seq(-10, 10, length.out = 500)
+
+# Calculate pdf values for Normal and Laplace distributions
+pdf_normal <- dnorm(x, mean = mu, sd = sigma)
+pdf_laplace <- 1 / (2 * scale) * exp(-abs(x - mu) / scale)
+
+# Plotting
+plot(x, pdf_normal, type = "l", col = "blue", xlab = "x", ylab = "Probability Density",
+     main = "PDF Comparison: Normal vs Laplace Distribution")
+lines(x, pdf_laplace, col = "red")
+legend("topright", legend = c("Normal Distribution", "Laplace Distribution"),
+       col = c("blue", "red"), lty = 1)
+```
+
+\pagebreak
+
+## d. 
+
+The claim that the linear model using Laplace error noise is more robust to outliers can be supported by observing the behavior of the probability density functions (pdfs) of the Normal and Laplace distributions in the previous plot.
+
+Here are some arguments based on the plot to support the claim:
+
+- **Heavier Tails of the Laplace Distribution** : In the plot, it can be seen that the Laplace distribution's pdf has heavier tails compared to the Normal distribution. This means that the Laplace distribution assigns more probability to extreme values (outliers) compared to the Normal distribution. 
+
+- **Reduced Influence of Outliers** : In the Laplace distribution, the tail behavior implies that outliers will have a smaller impact on the model estimation compared to the Normal distribution. Outliers that are far from the mean will contribute less to the overall loss, making the model less sensitive to extreme observations. On the other hand, the Normal distribution's lighter tails make it more sensitive to outliers.
+
+- **Minimization of Absolute Errors** : The Laplace distribution's density has a sharp peak at the mean, resulting in a higher concentration of values around the center. When you minimize the absolute error loss, which the Laplace distribution corresponds to, you effectively prioritize minimizing the impact of large individual errors (outliers) rather than the sum of squared errors as in the Normal distribution case. This aligns well with the robustness against individual extreme observations.
