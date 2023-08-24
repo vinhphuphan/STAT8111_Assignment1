@@ -74,11 +74,11 @@ $\hat{pemax} = 63.5456 + 1.1867 weight +  \epsilon$ $\>$$( \epsilon \sim N(0, \s
 
 #### Model Fit
 
-- The $R^2 = 0.4035$ which means 40.35% of variation in `pemax` can be explained by `weight`. This show that the model is not fit well.
+- The $R^2 = 0.4035$ which means 40.35% of the variation in `pemax` can be explained by `weight`. This shows that the model does not fit well.
 
 #### Model interpretation
 
-- According to the equation, for each unit increase in weight, the pemax will increase about 1.1867.   
+- According to the equation, for each unit increase in weight, the `pemax` will increase about 1.1867.   
 
 - `weight` is significant predictor since the p-value = 0.000646 (< 0.001).
 
@@ -127,7 +127,7 @@ ggplot(data, aes(x = weight, y = pemax, color = factor(sex))) +
   theme_minimal()
 ```
 
-The lines of graph are not parallel which shows that there is a significant interaction between `weight` and `pemax` with respect to `sex`. This interaction effect indicates that the relationship between `weight` and `pemax` variable depends on the sex of the individual. This suggests that there might be an interaction effect between `weight` and `sex` in predicting `pemax`.
+The lines of graph are not parallel which shows that there is a interaction between `weight` and `pemax` with respect to `sex`. This interaction effect indicates that the relationship between `weight` and `pemax` variable depends on the sex of the individual. This suggests that there might be an interaction effect between `weight` and `sex` in predicting `pemax`.
 
 ```{r model 3, include=TRUE }
 model_3 <- lm(pemax ~ weight*sex, data = data)
@@ -189,6 +189,8 @@ correlation_matrix <- cor(data[, c("weight", "bmp", "fev1")])
 # Print the correlation matrix
 print(correlation_matrix)
 ```
+\pagebreak
+
 ### Diagnostic Checking
 
 ```{r diagnostic 2, include=TRUE }
