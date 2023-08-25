@@ -283,7 +283,7 @@ The simpler form of the pdf:
 in this case :
 \[\frac{y\theta - b(\theta) }{a(\phi)}+c(y, \phi) = -\frac{\gamma x}{2\mu^2}+\frac{x}{\mu}+\frac{1}{2}log(\frac{\gamma}{2\pi x^3}) +\frac{\gamma}{2x}\]
 
-with: \[\phi = \frac{1}{\gamma} , \> a(\phi) = \frac{1}{\gamma}, \> \theta = -\frac{1}{2\mu^2}, \>b(\theta) = 2\theta^\frac{1}{2} , c = \frac{1}{2}log(\frac{\theta}{2\pi x^3}) +\frac{\theta}{2x}\].
+with: \[\phi = \frac{1}{\gamma} , \> a(\phi) = \frac{-2}{\gamma}, \> \theta = \frac{1}{\mu^2}, \>b(\theta) = 2\theta^\frac{1}{2} , c = \frac{1}{2}log(\frac{\theta}{2\pi x^3}) +\frac{\theta}{2x}\].
 
 ## b.
 
@@ -296,22 +296,36 @@ In the context of the exponential family representation of the Inverse Gaussian 
 ## c.
 
 **Mean**
-\begin{align*}
-b'(\theta) &= \frac{1}{\sqrt{2\theta}}, \quad \text{where } \theta = -\frac{1}{2\mu^2}. \\
-\text{Substitute } \theta &= -\frac{1}{2\mu^2}: \\
-b'(\theta) &= \frac{1}{\sqrt{2 \left( -\frac{1}{2\mu^2} \right)}} \\
-\text{Simplify:} \\
-b'(\theta) &= \frac{1}{\sqrt{-\frac{1}{\mu^2}}} = \frac{1}{\frac{1}{\mu}} = \mu \\
-\text{So, } E[X] &= \mu \\
-\end{align*}
+
+Recall that \(E[Y] = b'(\theta)\) is the derivative of \(b(\theta)\) with respect to \(\theta\):
+
+\[ b'(\theta) = \frac{d}{d\theta} \left(2\theta^\frac{1}{2}\right) \]
+
+Let's start by differentiating the expression inside the parenthesis:
+
+\[ \frac{d}{d\theta} \left(2\theta^\frac{1}{2}\right) = \frac{1}{2} \cdot 2 \cdot \theta^{-\frac{1}{2}} = \theta^{-\frac{1}{2}} \]
+
+Now, since \(\theta = \frac{1}{\mu^2}\), we substitute \(\theta\) into the derivative:
+
+\[ b'(\theta) = \theta^{-\frac{1}{2}} = \left(\frac{1}{\mu^2}\right)^{-\frac{1}{2}} = \mu \]
+
+So, when \(\theta = \frac{1}{\mu^2}\), the derivative \(b'(\theta)\) for the function \(b(\theta) = 2\theta^\frac{1}{2}\) is \(b'(\theta) = \mu\).
+
 **Variance**
 
-\begin{align*}
-Var(Y) &= b''(\theta)\phi \\ \\
-Var(Y) &= \phi\theta^{-\frac{3}{2}} \\ \\
-Recall\>that\>\theta^{-\frac{1}{2}} &= \mu\> and\> \phi = \frac{1}{\gamma}\\ \\
-\Rightarrow\>Var(Y) &= \frac{\mu^3}{\gamma}
-\end{align*}
+We have \(Var[Y] = b''(\theta) a(\phi)\)
+
+Given the values of \(a(\phi) = -2(\phi)\), \(b'(\theta) = \theta^{-\frac{1}{2}}\), and \(\theta = \frac{1}{\mu^2}\).
+
+\(Var[Y] = \frac{d}{d\theta}\theta^{-\frac{1}{2}} -2(\phi)\)
+
+\(Var[Y] = \theta^{-\frac{3}{2}}(\phi)\)
+
+Recall that : \(\theta^{-\frac{1}{2}} =  \mu\)
+
+So, \(\theta^{-\frac{3}{2}}  =  \mu^3\) with \(\phi = \frac{1}{\gamma}\)
+
+\(\Rightarrow Var[Y] = \frac{mu^3}{\gamma}\).
 
 # Question 3
 
