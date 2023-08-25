@@ -26,7 +26,7 @@ data <- cystfibr
 head(data)
 ```
 
-## a.Examine first graphically and numerically correlation between variables, then comment :
+## a.
 
 ### Numerical correlation
 ```{r numerical correlation, include=TRUE }
@@ -50,11 +50,9 @@ From the above correlation plot and correlation table, it can be seen that :
 
 - Lastly, `rv` highly positively correlated with `frc`.
 
-## b. the relationship between `weight` and `pemax`
+## b. 
 
 In this part, the relationship between `weight` and `pemax` will be examined.Specifically, `pemax` is the dependent variable (Y) and `weight` is the independent variable (X).
-
-\pagebreak
 
 ### Scatter Plot
 ```{r scatter Plot, include=TRUE }
@@ -94,24 +92,26 @@ plot(model, which = c(1,2))
 
 \pagebreak
 
-## c. Include in the previous model the sex variable
+## c. 
 ### Model 2
 ```{r model 2, include=TRUE }
-model_2 <- lm(pemax ~ sex, data = data)
+model_2 <- lm(pemax ~ weight + sex, data = data)
 summary(model_2)
 ```
 
-**The model 2 equation** $\hat{pemax} = 117.50 +(-19.05)sex_i  +  \epsilon$ $\>$ $( \epsilon \sim N(0, \sigma^2))$ 
+**The model 2 equation** $\hat{pemax} = 70.9719 +  1.1248weight +(-11.4776)sex_i  +  \epsilon$ $\>$ $( \epsilon \sim N(0, \sigma^2))$ 
 
 **Model 2 analysis**
 
-- This model only includes the "sex" variable as a predictor for "pemax."
+- This model includes the `sex` and `weight` variables as a predictor for `pemax`
 
-- For p-value = 0.162, `sex` is insignificant predictor since there is no clear relationship between `sex` and `pemax`.
+- `sex` is insignificant predictor (with p-value = 0.29926) since there is no clear relationship between `sex` and `pemax`.
 
-- The $R^2 = 0.08327$ indicates that the model is poor, only 8.32% of variation in `pemax` can be explained by `sex`.
+- `weight` is significant predictor with p-value = 0.00131
 
-- The F-statistic is not highly significant (p-value: 0.1618), suggesting that the model might not be a good fit for the data.
+- The $R^2 = 0.4327$ indicates that the model does not fit well, only 43.27% of variation in `pemax` can be explained by this model.
+
+- the p-value for the F-statistic is 0.00196, indicating that the model as a whole is statistically significant.
 
 \pagebreak
 
@@ -152,11 +152,56 @@ $\hat{pemax} = 61.3603 + 1.3572weight + 22.0905sex + (-0.9240) weight\times sex 
 
 ### Conclusion
 
-Based on the analysis, Model 3 (including both "weight" and "sex" with interaction) seems to be a better fit for predicting "pemax" compared to Model 1 (including `weight`) and Model 2 (only "sex").  Model 2 (with  $R^2 = 0.477$ and $adjusted R^2 = 0.4023$ ) provides more insight into the relationship between the predictors and the response, and it demonstrates a better overall fit to the data.
+Based on the analysis, Model 3 (including both "weight" and "sex" with interaction) seems to be the best model among three model for predicting "pemax" compared to Model 1 (only `weight`) and Model 2 ( including `sex` and `weight`).  Model 3 (with  $R^2 = 0.477$ and $adjusted R^2 = 0.4023$ ) provides more insight into the relationship between the predictors and the response, and it demonstrates a better overall fit to the data.
 
-## d. Construct a statistical model for the response variables pemax based on the normal response distribution and the weight, bmp, fev1, rv,frc.
+## d.
 
-We are interested in predicting `pemax` (maximal expiratory pressure) by using `weight`, `bmp`, `fev1`, `rv`,`frc`. In this case, the stepwise backward selection will be used to find the best model. In stepwise backward selection, people first regress with all predictor variables in the model. Then, the predictors with the largest p-value in the t-test will be dropped. Next step is fitting the reduced model. This progess will be run iteratively until all variables in the model are significant.Let's start with the full model.
+We are interested in predicting `pemax` (maximal expiratory pressure) by using `weight`, `bmp`, `fev1`, `rv`,`frc`. In this case, the stepwise backward selection will be used to find the best model. In stepwise backward selection, people first regress with all predictor variables in the model. Then, the predictors with the largest p-value in the t-test will be dropped. Next step is fitting the reduced model. This progess will be run iteratively until all variables in the model are significant. First, we will check the distributions of independent variables.
+
+### Exam the histogram
+
+```{r histogram, include=TRUE}
+# Obtain histograms
+par(mfrow = c(2,3))
+hist(data$weight, 
+     main="Distribution of weight",
+     col="#98c1d9")
+hist(data$bmp, 
+     main="Distribution of bmp",
+     col="#98c1d9")
+hist(data$fev1, 
+     main="Distribution of fev1",
+     col="#98c1d9")
+hist(data$rv, 
+     main="Distribution of rv",
+     col="#98c1d9")
+hist(data$frc, 
+     main="Distribution of frc",
+     col="#98c1d9")
+
+```
+
+The graphs indicate that most of variables are right-skewed except for `fev1`. Therefore, I will try the log tranformation for them.
+
+```{r log histogram, include=TRUE}
+# Obtain histograms after log transformation
+par(mfrow = c(2,2))
+hist(log(data$weight), 
+     main="Distribution of log(weight)",
+     col="#98c1d9")
+hist(log(data$bmp), 
+     main="Distribution of log(data$bmp)",
+     col="#98c1d9")
+hist(sqrt(data$rv), 
+     main="Distribution of log(rv)",
+     col="#98c1d9")
+hist(sqrt(data$frc), 
+     main="Distribution of log(frc)",
+     col="#98c1d9")
+
+```
+According to the histograms,the log transformation is not effective in this case. Hence, the normal form of variables will be use for the linear model. Since I have examined the correlation plot and correlation table in question 1a,  I will reuse the above information to advoid the collinearities  .Now, Let's start with the full model.
+
 
 ### Full Model
 ```{r fullmodel, include=TRUE }
@@ -164,7 +209,7 @@ full_model <- lm(pemax ~ weight + bmp + fev1 + rv + frc , data = data)
 summary(full_model)
 ```
 
-It can be seen that `frc` has the largest p-value which is 0.937703. Therefore, `frc` explains the least variation when added to the model. Now , `frc` will be dropped.
+It can be seen that `frc` is insignificant predictor at significant level 5% and has the largest p-value which is 0.937703. Therefore, `frc` explains the least variation when added to the model. Now , `frc` will be dropped.
 
 ### The reduced model without `frc`
 ```{r reduced without frc, include=TRUE }
@@ -172,7 +217,7 @@ reduced_model <- lm(pemax ~ weight + bmp + fev1 + rv , data = data)
 summary(reduced_model)
 ```
 
-Similarly, `rv` is the insignificant predictor and has the largest P-value which is 0.146178. Hence, I drop `rv` and fit the reduced model without `frc` and `rv`.
+Similarly, `rv` is the insignificant predictor at significant level 5%  and has the largest P-value which is 0.146178. Hence, I drop `rv` and fit the reduced model without `frc` and `rv`.
 
 
 ### The reduced model without `frc` and `rv`
@@ -180,8 +225,6 @@ Similarly, `rv` is the insignificant predictor and has the largest P-value which
 reduced_model_2 <- lm(pemax ~ weight + bmp + fev1 , data = data)
 summary(reduced_model_2)
 ```
-At this stage, all predictors are significant, therefore, selection process stops here. Nevertheless, there is moderate multi-collinearity since `bmp`, `weight`, `fev1` are positively correlated.
-
 ```{r correlation_matrix, include=TRUE}
 # Calculate the correlation matrix
 correlation_matrix <- cor(data[, c("weight", "bmp", "fev1")])
@@ -189,7 +232,8 @@ correlation_matrix <- cor(data[, c("weight", "bmp", "fev1")])
 # Print the correlation matrix
 print(correlation_matrix)
 ```
-\pagebreak
+
+At this stage, all predictors are significant, therefore, selection process stops here. Nevertheless, there is moderate collinearities since `bmp`, `weight`, `fev1` are positively correlated. Their correlation are insignificant because all correlation scores are less than 0.7.
 
 ### Diagnostic Checking
 
@@ -221,7 +265,7 @@ From above equation,
 - The final mode has a balance between model complexity and goodness of fit.
 
 # Question 2
-## a.Show that the Inverse Gaussian distribution is a member of the exponential family
+## a.
 
 The Inverse Gaussian distribution is defined a
 
@@ -241,7 +285,7 @@ in this case :
 
 with: \[\phi = \frac{1}{\gamma} , \> a(\phi) = \frac{1}{\gamma}, \> \theta = -\frac{1}{2\mu^2}, \>b(\theta) = 2\theta^\frac{1}{2} , c = \frac{1}{2}log(\frac{\theta}{2\pi x^3}) +\frac{\theta}{2x}\].
 
-## b. Give the natural parameter and the scale parameter
+## b.
 
 In the context of the exponential family representation of the Inverse Gaussian distribution, the natural parameter and the scale parameter can be identified as follows :
 
@@ -249,7 +293,7 @@ In the context of the exponential family representation of the Inverse Gaussian 
 
 **Scale Parameter** is $\mu$.
 
-## c. Derive the mean and variance of Inverse Gaussian distribution.
+## c.
 
 **Mean**
 \begin{align*}
@@ -345,8 +389,6 @@ lines(x, pdf_laplace, col = "red")
 legend("topright", legend = c("Normal Distribution", "Laplace Distribution"),
        col = c("blue", "red"), lty = 1)
 ```
-
-\pagebreak
 
 ## d. 
 
